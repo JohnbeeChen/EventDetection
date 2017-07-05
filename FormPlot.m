@@ -1,4 +1,4 @@
-function varargout = untitled(varargin)
+function varargout = FormPlot(varargin)
 % UNTITLED MATLAB code for untitled.fig
 %      UNTITLED, by itself, creates a new UNTITLED or raises the existing
 %      singleton*.
@@ -22,7 +22,7 @@ function varargout = untitled(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 04-Jul-2017 21:46:18
+% Last Modified by GUIDE v2.5 05-Jul-2017 14:57:08
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -90,9 +90,10 @@ set(myAxes,'visible','on');
 axes(myAxes);
 cla reset;
 plot(myCurve);
+grid on
 
 function SetText(myText, myString)
-set(myText,'String',myString);
+set(myText,'String',myString); 
 
 
 % --- Executes on button press in btn_previous.
@@ -135,8 +136,8 @@ function MenuSmooth_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 data = handles.inputdata;
 prompt={'Enter level:'};
-defans={num2str(2)};
-info = inputdlg(prompt, 'Input for process...!', 1, defans);
+defaults={num2str(3)};
+info = inputdlg(prompt, 'Input for process...!', 1, defaults);
 if ~isempty(info)
     level = str2double(info(1));
     smoothdata = My_SWT(data,level);
@@ -147,6 +148,50 @@ if ~isempty(info)
     SetText(handles.text_index,s);
     handles.index = 1;
     handles.swtdata = smoothdata;
+    %@plotdata will be ploted on @axes1 
     handles.plotdata = smoothdata;
     guidata(hObject, handles);
 end
+
+
+% --------------------------------------------------------------------
+function MenuDetect_Callback(hObject, eventdata, handles)
+% hObject    handle to MenuDetect (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+index = handles.index;
+linedata =  handles.swtdata(index,:);
+max_v = max(linedata(:));
+min_v = min(linedata(:));
+thre = 0.2 * (max_v - min_v);
+prompt={'Enter Min Peak Prominence :'};
+defaults={num2str(thre)};
+info = inputdlg(prompt, 'Input for process...!', 1, defaults);
+PlotAxes(handles.axes1,linedata);
+if ~isempty(info)
+    level = str2double(info(1));   
+    [pck_infos,event_infos] = VectorsFindPeaks(linedata,level);
+    if ~isempty(pck_infos)
+        AxesAddPeaksLocation(handles.axes1,pck_infos(2,:),pck_infos(1,:));
+        AxesAddPeaksWidth(handles.axes1,linedata,event_infos(:,1));
+        AxesAddPeaksWidth(handles.axes1,linedata,event_infos(:,2));
+    end
+    handles.eventinfos{index} = event_infos;
+end
+guidata(hObject, handles);
+
+
+function AxesAddPeaksLocation(myAxes,xVal,yVal)
+set(myAxes,'visible','on');
+axes(myAxes);
+hold on 
+plot(xVal,yVal,'o');
+hold off
+
+function AxesAddPeaksWidth(myAxes, lineData,widthLoc)
+yVal = lineData(widthLoc);
+set(myAxes,'visible','on');
+axes(myAxes);
+hold on 
+plot(widthLoc,yVal,'r.');
+hold off
