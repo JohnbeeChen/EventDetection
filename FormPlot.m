@@ -22,7 +22,7 @@ function varargout = FormPlot(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 06-Jul-2017 16:43:49
+% Last Modified by GUIDE v2.5 06-Jul-2017 20:20:44
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -72,7 +72,7 @@ end
 guidata(hObject, handles);
 
 % UIWAIT makes untitled wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
+uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
@@ -84,6 +84,7 @@ function varargout = untitled_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
+delete(handles.figure1);
 
 function PlotAxes(myAxes,myCurve)
 set(myAxes,'visible','on');
@@ -207,3 +208,16 @@ linedata =  handles.plotdata(index,:);
 handles.plotdata(index,:) = BleachCorrection(linedata);
 PlotAxes(handles.axes1,handles.plotdata(index,:));
 guidata(hObject, handles);
+
+
+% --- Executes on button press in btn_finish.
+function btn_finish_Callback(hObject, eventdata, handles)
+% hObject    handle to btn_finish (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if isfield(handles,'eventinfos')
+    handles.output = handles.eventinfos;
+end
+guidata(hObject, handles);
+uiresume(handles.figure1);
+% close(handles.figure1);

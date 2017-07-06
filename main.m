@@ -4,6 +4,7 @@ addpath([cd '/data']);
 addpath([cd '/common']);
 addpath([cd '/ReadROI']);
 addpath([cd '/detection']);
+addpath([cd '/GaussianFit']);
 
 % roi_filename = strcat(cd,'/data/RoiSet.zip');
 % rois = ReadImageJROI(roi_filename);

@@ -3,7 +3,7 @@ function varargout = KeepROI(imgStack,boxROI)
 
 tem_imgs = zeros(size(imgStack(:,:,1)));
 box_mat = boxROI;
-start_p = box_mat(:,1:2) - 0.5;
+start_p = box_mat(:,1:2);
 stop_p = start_p + box_mat(:,3:4);
 id_x = start_p(1):stop_p(1);
 id_y = start_p(2):stop_p(2);

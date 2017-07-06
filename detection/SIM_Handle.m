@@ -6,17 +6,17 @@ pixe_size = 32.5; %nanometer
 psf_hw = 1.5; % the half-high-half-width per pixel
 least_fram = 4; %the fram number that the particle exists at least 
 
-region_num = length(boxsSIM);
-box_mat = struct2cell(boxsSIM)';
-box_mat = cell2mat(box_mat);
+region_num = length(eventSIM);
+% box_mat = struct2cell(boxsSIM)';
+box_mat = boxsSIM;
 
 regoin_fit_result  = cell(region_num,1);
 % regoin_fit_precise = cell(region_num,1);
 % region_num = 3;
 for ii = 1:region_num
+    disp(['regoin:',num2str(ii),' event fiting is starting']);
     tem_event = eventSIM{ii};
     event_num = size(tem_event,1);
-    
     tem_box = box_mat(ii,:);
     for jj = 1:event_num
         event_duration = tem_event(jj,1):tem_event(jj,2);
@@ -36,7 +36,7 @@ for ii = 1:region_num
     end
     regoin_fit_result{ii} = MyCell2Mat(event_fit_result);
 %     regoin_fit_precise{ii} = MyCell2Mat(precise);
-    disp('one event fiting is completed');
+    disp(['regoin:',num2str(ii),' event fiting is completed']);
 end
 disp('all done');
 varargout{1} = regoin_fit_result;

@@ -22,7 +22,7 @@ function varargout = MainForm(varargin)
 
 % Edit the above text to modify the response to help MainForm
 
-% Last Modified by GUIDE v2.5 04-Jul-2017 20:11:50
+% Last Modified by GUIDE v2.5 06-Jul-2017 20:22:52
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -179,5 +179,16 @@ function btn_zprofile_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 boxs = handles.roiboxs;
 all_profile = TIRF_Z_Profile(handles.images,boxs);
-handles.profiles = FormPlot(all_profile);
+handles.eventinfo = FormPlot(all_profile);
 guidata(hObject,handles);
+
+
+% --- Executes on button press in btn_findparticles.
+function btn_findparticles_Callback(hObject, eventdata, handles)
+% hObject    handle to btn_findparticles (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+boxs = handles.roiboxs;
+sim_event_info = handles.eventinfo;
+fit_result = SIM_Handle(double(handles.images),sim_event_info,boxs);
+t = 1;
