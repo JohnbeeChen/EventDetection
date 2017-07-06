@@ -22,7 +22,7 @@ function varargout = FormPlot(varargin)
 
 % Edit the above text to modify the response to help untitled
 
-% Last Modified by GUIDE v2.5 05-Jul-2017 14:57:08
+% Last Modified by GUIDE v2.5 06-Jul-2017 16:43:49
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -93,7 +93,7 @@ plot(myCurve);
 grid on
 
 function SetText(myText, myString)
-set(myText,'String',myString); 
+set(myText,'String',myString);
 
 
 % --- Executes on button press in btn_previous.
@@ -103,13 +103,13 @@ function btn_previous_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 index = handles.index;
 if index > 1
-   index = index - 1;
-   linedata = handles.plotdata(index,:);
-   PlotAxes(handles.axes1,linedata);
-   s = [num2str(index),'/',num2str(handles.linenum)];
-   SetText(handles.text_index,s);
-   handles.index = index;
-   guidata(hObject, handles);
+    index = index - 1;
+    linedata = handles.plotdata(index,:);
+    PlotAxes(handles.axes1,linedata);
+    s = [num2str(index),'/',num2str(handles.linenum)];
+    SetText(handles.text_index,s);
+    handles.index = index;
+    guidata(hObject, handles);
 end
 
 % --- Executes on button press in btn_next.
@@ -119,13 +119,13 @@ function btn_next_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 index = handles.index;
 if index < handles.linenum
-   index = index + 1;
-   linedata = handles.plotdata(index,:);
-   PlotAxes(handles.axes1,linedata);
-   s = [num2str(index),'/',num2str(handles.linenum)];
-   SetText(handles.text_index,s);
-   handles.index = index;
-   guidata(hObject, handles);
+    index = index + 1;
+    linedata = handles.plotdata(index,:);
+    PlotAxes(handles.axes1,linedata);
+    s = [num2str(index),'/',num2str(handles.linenum)];
+    SetText(handles.text_index,s);
+    handles.index = index;
+    guidata(hObject, handles);
 end
 
 
@@ -148,7 +148,7 @@ if ~isempty(info)
     SetText(handles.text_index,s);
     handles.index = 1;
     handles.swtdata = smoothdata;
-    %@plotdata will be ploted on @axes1 
+    %@plotdata will be ploted on @axes1
     handles.plotdata = smoothdata;
     guidata(hObject, handles);
 end
@@ -160,7 +160,7 @@ function MenuDetect_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 index = handles.index;
-linedata =  handles.swtdata(index,:);
+linedata =  handles.plotdata(index,:);
 max_v = max(linedata(:));
 min_v = min(linedata(:));
 thre = 0.2 * (max_v - min_v);
@@ -169,7 +169,7 @@ defaults={num2str(thre)};
 info = inputdlg(prompt, 'Input for process...!', 1, defaults);
 PlotAxes(handles.axes1,linedata);
 if ~isempty(info)
-    level = str2double(info(1));   
+    level = str2double(info(1));
     [pck_infos,event_infos] = VectorsFindPeaks(linedata,level);
     if ~isempty(pck_infos)
         AxesAddPeaksLocation(handles.axes1,pck_infos(2,:),pck_infos(1,:));
@@ -184,7 +184,7 @@ guidata(hObject, handles);
 function AxesAddPeaksLocation(myAxes,xVal,yVal)
 set(myAxes,'visible','on');
 axes(myAxes);
-hold on 
+hold on
 plot(xVal,yVal,'o');
 hold off
 
@@ -192,6 +192,18 @@ function AxesAddPeaksWidth(myAxes, lineData,widthLoc)
 yVal = lineData(widthLoc);
 set(myAxes,'visible','on');
 axes(myAxes);
-hold on 
+hold on
 plot(widthLoc,yVal,'r.');
 hold off
+
+
+% --- Executes on button press in btn_correction.
+function btn_correction_Callback(hObject, eventdata, handles)
+% hObject    handle to btn_correction (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+index = handles.index;
+linedata =  handles.plotdata(index,:);
+handles.plotdata(index,:) = BleachCorrection(linedata);
+PlotAxes(handles.axes1,handles.plotdata(index,:));
+guidata(hObject, handles);

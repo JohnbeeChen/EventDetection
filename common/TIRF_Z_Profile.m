@@ -12,8 +12,8 @@ for ii = 1: regoin_num
     tem_regoin = gpu_tirf(row,com,:);
     for jj = 1:imgs_num
         tem = tem_regoin(:,:,jj);
-        profile(ii,jj) = sum(tem(:));
-    end
+        profile(ii,jj) = sum(tem(:))/numel(tem);
+    end    
 end
 varargout{1} = profile;
 end
