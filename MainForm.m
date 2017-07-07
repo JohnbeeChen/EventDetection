@@ -153,6 +153,7 @@ roi_filename = fullfile(pathname,filename);
 if filename
     rois = ReadImageJROI(roi_filename);
     roi_num = length(rois);
+    box =zeros(roi_num,4);
     if roi_num == 1
         box(1,:) = rois.vnRectBounds;
     elseif roi_num > 1
@@ -164,6 +165,14 @@ if filename
     % changes the format of @box to [x y w h]
     box(:,[4 3]) = box(:,3:4) - box(:,1:2) + 1;
     box(:,1:2) = box(:,[2 1]); 
+    idx = box(:,[1 2]) == 0;
+    box(idx) = 1;
+    img_size = size(handles.images(:,:,1));
+    idx = box(:,1) > img_size(2);
+    box(idx) = img_size(2);
+    idx = box(:,2) > img_size(1);
+    box(idx) = img_size(1);    
+    
     handles.roiboxs = box;
     AddRectagle(handles.axes1,box);
     guidata(hObject,handles);
@@ -188,7 +197,17 @@ function btn_findparticles_Callback(hObject, eventdata, handles)
 % hObject    handle to btn_findparticles (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+prompt={'Pixe size(/nm):','half-high-half-width of psf(/pixel):','least fram:','parallel flag:'};
+defaults={num2str(32.5),num2str(1.5),num2str(4),num2str(0)};
+info = inputdlg(prompt, 'Input for process...!', 1, defaults);
+if ~isempty(info)
+    parameters(1) = str2double(info(1));
+    parameters(2) = str2double(info(2));  
+    parameters(3) = str2double(info(3));
+    parameters(4) = str2double(info(4));    
+end
 boxs = handles.roiboxs;
 sim_event_info = handles.eventinfo;
-fit_result = SIM_Handle(double(handles.images),sim_event_info,boxs);
-t = 1;
+fit_result = SIM_Handle(double(handles.images),sim_event_info,boxs,parameters);
+t= 1;
+

@@ -220,4 +220,4 @@ if isfield(handles,'eventinfos')
 end
 guidata(hObject, handles);
 uiresume(handles.figure1);
-% close(handles.figure1);
+

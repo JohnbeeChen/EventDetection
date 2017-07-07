@@ -1,10 +1,15 @@
-function varargout = SIM_Handle(imgSIM,eventSIM,boxsSIM)
+function varargout = SIM_Handle(imgSIM,eventSIM,boxsSIM,parIn)
 % handle the SIM's images
 % result[event_num,start_fram,stop_fram,xc,yc,precise_x,precise_y]
 
-pixe_size = 32.5; %nanometer
-psf_hw = 1.5; % the half-high-half-width per pixel
-least_fram = 4; %the fram number that the particle exists at least 
+
+% pixe_size = 32.5; %nanometer
+% psf_hw = 1.5; % the half-high-half-width per pixel
+% least_fram = 4; %the fram number that the particle exists at least 
+pixe_size = parIn(1);
+psf_hw = parIn(2);
+least_fram = parIn(3);
+parfor_falg = parIn(4);
 
 region_num = length(eventSIM);
 % box_mat = struct2cell(boxsSIM)';
@@ -18,21 +23,45 @@ for ii = 1:region_num
     tem_event = eventSIM{ii};
     event_num = size(tem_event,1);
     tem_box = box_mat(ii,:);
-    for jj = 1:event_num
-        event_duration = tem_event(jj,1):tem_event(jj,2);
-        event_frams = imgSIM(:,:,event_duration);
-        %set all pixels equal to 0 that beyond the region
-        event_frams_roi = KeepROI(event_frams,tem_box);
-        particles = FindParticles(event_frams_roi,3,3);
-        DV = Point_Linking(particles, psf_hw,least_fram);
-        tem_result = Point_Fitting(event_frams,DV,2);
-        star_fram = tem_event(jj,1);
-        % modifies the local fram_num to global fram_num
-        tem_result = KeepStartFram(tem_result,star_fram);
-        precise =  Localization_Precise(tem_result,pixe_size);
-        tem_result(:,5:6) = precise;
-        tem_result(:,7:8) = [];         
-        event_fit_result{jj} = tem_result;
+    if parfor_falg
+        parfor jj = 1:event_num
+            disp(['event',num2str(jj),': fiting is starting']);
+            event_duration = tem_event(jj,1):tem_event(jj,2);
+            event_frams = imgSIM(:,:,event_duration);
+            %set all pixels equal to 0 that beyond the region
+            event_frams_roi = KeepROI(event_frams,tem_box);
+            particles = FindParticles(event_frams_roi,3,3);
+            DV = Point_Linking(particles, psf_hw,least_fram);
+            tem_result = Point_Fitting(event_frams,DV,2);
+            star_fram = tem_event(jj,1);
+            % modifies the local fram_num to global fram_num
+            tem_result = KeepStartFram(tem_result,star_fram);
+            precise =  Localization_Precise(tem_result,pixe_size);
+            tem_result(:,5:6) = precise;
+            tem_result(:,7:8) = [];
+            event_fit_result{jj} = tem_result;
+            disp(['event',num2str(jj),': fiting is completed']);
+        end      
+    else
+        event_fit_result = cell(1,event_num);
+        for jj = 1:event_num
+            disp(['event',num2str(jj),': fiting is starting']);
+            event_duration = tem_event(jj,1):tem_event(jj,2);
+            event_frams = imgSIM(:,:,event_duration);
+            %set all pixels equal to 0 that beyond the region
+            event_frams_roi = KeepROI(event_frams,tem_box);
+            particles = FindParticles(event_frams_roi,3,3);
+            DV = Point_Linking(particles, psf_hw,least_fram);
+            tem_result = Point_Fitting(event_frams,DV,2);
+            star_fram = tem_event(jj,1);
+            % modifies the local fram_num to global fram_num
+            tem_result = KeepStartFram(tem_result,star_fram);
+            precise =  Localization_Precise(tem_result,pixe_size);
+            tem_result(:,5:6) = precise;
+            tem_result(:,7:8) = [];
+            event_fit_result{jj} = tem_result;
+            disp(['event',num2str(jj),': fiting is completed']);
+        end
     end
     regoin_fit_result{ii} = MyCell2Mat(event_fit_result);
 %     regoin_fit_precise{ii} = MyCell2Mat(precise);
