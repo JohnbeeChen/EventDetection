@@ -54,7 +54,9 @@ function FormTable_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for FormTable
 handles.output = hObject;
-
+fitting_result = varargin{1};
+col_name = varargin{2};
+set(handles.uitable1,'ColumnName',col_name,'Data',real(fitting_result{1}));
 % Update handles structure
 guidata(hObject, handles);
 
