@@ -5,12 +5,13 @@ function varargout = SIM_Handle(imgSIM,eventSIM,boxsSIM,parIn)
 
 % pixe_size = 32.5; %nanometer
 % psf_hw = 1.5; % the half-high-half-width per pixel
-% least_fram = 4; %the fram number that the particle exists at least 
+% least_fram = 4; %the fram number that the particle exists at least
 pixe_size = parIn(1);
 psf_hw = parIn(2);
 least_fram = parIn(3);
-parfor_falg = parIn(4);
+parfor_falg = parIn(4);% 0 for no using prarfor
 
+img_size = size(imgSIM(:,:,1));
 region_num = length(eventSIM);
 % box_mat = struct2cell(boxsSIM)';
 box_mat = boxsSIM;
@@ -19,7 +20,7 @@ regoin_fit_result  = cell(region_num,1);
 % regoin_fit_precise = cell(region_num,1);
 % region_num = 3;
 for ii = 1:region_num
-    disp(['regoin:',num2str(ii),' event fiting is starting']);
+    disp(['regoin ',num2str(ii),': event fiting is starting']);
     tem_event = eventSIM{ii};
     event_num = size(tem_event,1);
     tem_box = box_mat(ii,:);
@@ -32,7 +33,7 @@ for ii = 1:region_num
             event_frams_roi = KeepROI(event_frams,tem_box);
             particles = FindParticles(event_frams_roi,3,3);
             DV = Point_Linking(particles, psf_hw,least_fram);
-            tem_result = Point_Fitting(event_frams,DV,2);
+            tem_result = Point_Fitting(event_frams,DV,1);
             star_fram = tem_event(jj,1);
             % modifies the local fram_num to global fram_num
             tem_result = KeepStartFram(tem_result,star_fram);
@@ -41,7 +42,7 @@ for ii = 1:region_num
             tem_result(:,7:8) = [];
             event_fit_result{jj} = tem_result;
             disp(['event',num2str(jj),': fiting is completed']);
-        end      
+        end
     else
         event_fit_result = cell(1,event_num);
         for jj = 1:event_num
@@ -63,15 +64,17 @@ for ii = 1:region_num
             disp(['event',num2str(jj),': fiting is completed']);
         end
     end
-    regoin_fit_result{ii} = MyCell2Mat(event_fit_result);
-%     regoin_fit_precise{ii} = MyCell2Mat(precise);
-    disp(['regoin:',num2str(ii),' event fiting is completed']);
+    tem_mat = MyCell2Mat(event_fit_result);
+    regoin_fit_result{ii} = ClearBadData(tem_mat,img_size);
+
+    disp(['regoin ',num2str(ii),': event fiting is completed']);
 end
 disp('all done');
 varargout{1} = regoin_fit_result;
-% if nargout ==2
-%     varargout{2} = regoin_fit_precise;
-% end
+
+
+
+
 
 function y = KeepStartFram(inX,starFram)
 
@@ -87,7 +90,7 @@ x(null_loc) = [];
 num = length(x);
 if num == 0
     y = [];
-   return; 
+    return;
 end
 infos = x{1};
 tem_len = size(infos,1);
@@ -99,3 +102,28 @@ for ii = 2:num
     infos = [infos;t];
 end
 y = infos;
+
+function y = ClearBadData(fitResult,imgSize)
+%clear the bad data in @fitResult
+id = fitResult(:,4) < 0;
+fitResult(id,:) = [];
+id = fitResult(:,4) > imgSize(2);
+fitResult(id,:) = [];
+
+id = fitResult(:,5) < 0;
+fitResult(id,:) = [];
+id = fitResult(:,5) > imgSize(1);
+fitResult(id,:) = [];
+
+
+id = fitResult(:,6) < 0;
+fitResult(id,:) = [];
+id = fitResult(:,6) > 100;
+fitResult(id,:) = [];
+
+id = fitResult(:,7) < 0;
+fitResult(id,:) = [];
+id = fitResult(:,7) > 100;
+fitResult(id,:) = [];
+
+y = fitResult;
