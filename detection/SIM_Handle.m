@@ -118,12 +118,12 @@ fitResult(id,:) = [];
 
 id = fitResult(:,6) < 0;
 fitResult(id,:) = [];
-id = fitResult(:,6) > 65;
+id = fitResult(:,6) > 32.5;
 fitResult(id,:) = [];
 
 id = fitResult(:,7) < 0;
 fitResult(id,:) = [];
-id = fitResult(:,7) > 65;
+id = fitResult(:,7) > 32.5;
 fitResult(id,:) = [];
 
 y = fitResult;

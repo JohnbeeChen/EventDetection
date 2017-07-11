@@ -22,16 +22,16 @@ function varargout = FormTable(varargin)
 
 % Edit the above text to modify the response to help FormTable
 
-% Last Modified by GUIDE v2.5 08-Jul-2017 15:03:37
+% Last Modified by GUIDE v2.5 11-Jul-2017 16:16:04
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @FormTable_OpeningFcn, ...
-                   'gui_OutputFcn',  @FormTable_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
+    'gui_Singleton',  gui_Singleton, ...
+    'gui_OpeningFcn', @FormTable_OpeningFcn, ...
+    'gui_OutputFcn',  @FormTable_OutputFcn, ...
+    'gui_LayoutFcn',  [] , ...
+    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
@@ -72,7 +72,7 @@ guidata(hObject, handles);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = FormTable_OutputFcn(hObject, eventdata, handles) 
+function varargout = FormTable_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -131,3 +131,50 @@ if idx < handles.region_num
     handles.index = idx;
 end
 guidata(hObject, handles);
+
+
+% --- Executes on button press in btn_analysis.
+function btn_analysis_Callback(hObject, eventdata, handles)
+% hObject    handle to btn_analysis (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+data_idx = handles.index;
+data = handles.fit_result{data_idx};
+len = size(data,1);
+event_num = data(len,1);
+for ii = 1:event_num
+    id = data(:,1) == ii;
+    event_data = data(id,:);
+    analyze_result = FitResultAnalyze(event_data,32.5);
+    t = 1;
+end
+
+function varargout = FitResultAnalyze(varargin)
+% analysis the fit result for getting the info of how many location
+% disapear in one events
+
+event_data = varargin{1};
+pixel_size = varargin{2};
+
+point_num = size(event_data,1);
+point_num = 1;
+result{1} = [];
+for ii = 1:point_num
+   point_one = event_data(ii,4:7);
+   same_state(1) = ii;
+   for jj = (ii+1):point_num
+      point_two = event_data(jj,4:7);
+      same_flag = IsSamePoints(point_one,point_two,pixel_size);
+      if same_flag
+          len = length(same_state);
+          same_state(len+1) = jj;          
+      end
+   end
+   len = length(same_state);
+   if len > 1
+       result_len = length(result);
+      result{result_len +1} = same_state; 
+   end
+   result(cellfun(@isempty,result)) = [];
+end
+varargout{1} = result;

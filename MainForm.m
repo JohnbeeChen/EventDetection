@@ -208,8 +208,10 @@ if ~isempty(info)
 end
 boxs = handles.roiboxs;
 sim_event_info = handles.eventinfo;
-fit_result = SIM_Handle(double(handles.images),sim_event_info,boxs,parameters);
-handles.fit_result = fit_result;
+% tic
+% fit_result = SIM_Handle(double(handles.images),sim_event_info,boxs,parameters);
+% toc
+% handles.fit_result = fit_result;
 guidata(hObject,handles);
 colum_name = {'event_ordinal','start_fram','end_fram','pixel_loc_x','pixel_loc_y','delta_x','delta_y'};
 FormTable(handles.fit_result,colum_name);
